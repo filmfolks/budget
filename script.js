@@ -72,13 +72,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const pages = parseFloat(document.getElementById('scene-pages').value).toFixed(1);
 
             const newRow = scheduleTableBody.insertRow();
+            // *** UPDATED: Added data-label attributes for mobile view ***
             newRow.innerHTML = `
-                <td>${sceneNumber}</td>
-                <td>${description}</td>
-                <td>${type}</td>
-                <td>${location}</td>
-                <td>${pages}</td>
-                <td><button class="btn-danger" onclick="deleteRow(this)">Delete</button></td>
+                <td data-label="Scene">${sceneNumber}</td>
+                <td data-label="Description">${description}</td>
+                <td data-label="Type">${type}</td>
+                <td data-label="Location">${location}</td>
+                <td data-label="Pages">${pages}</td>
+                <td data-label="Action"><button class="btn-danger" onclick="deleteRow(this)">Delete</button></td>
             `;
             scheduleForm.reset();
         });
@@ -105,11 +106,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const newRow = budgetTableBody.insertRow();
+            // *** UPDATED: Added data-label attributes for mobile view ***
             newRow.innerHTML = `
-                <td>${description}</td>
-                <td>${category}</td>
-                <td class="align-right" data-cost="${cost}">${formatCurrency(cost)}</td>
-                <td><button class="btn-danger" onclick="deleteRow(this)">Delete</button></td>
+                <td data-label="Description">${description}</td>
+                <td data-label="Category">${category}</td>
+                <td class="align-right" data-label="Cost" data-cost="${cost}">${formatCurrency(cost)}</td>
+                <td data-label="Action"><button class="btn-danger" onclick="deleteRow(this)">Delete</button></td>
             `;
             budgetForm.reset();
             updateTotalBudget();
