@@ -266,3 +266,90 @@ function getCurrencySymbol(currencyCode) {
     const symbols = { 'USD': '$', 'EUR': '€', 'INR': '₹', 'GBP': '£' };
     return symbols[currencyCode] || '$';
 }
+
+
+ // --- SCHEDULING PAGE LOGIC (UPDATED) ---
+    if (document.getElementById('schedule-form')) {
+        const scheduleForm = document.getElementById('schedule-form');
+
+        loadScheduleData();
+
+        scheduleForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            // Gather all data from the new form fields
+            const sceneData = {
+                number: document.getElementById('scene-number').value,
+                heading: document.getElementById('scene-heading').value,
+                type: document.getElementById('scene-type').value,
+                location: document.getElementById('scene-location').value,
+                pages: parseFloat(document.getElementById('scene-pages').value).toFixed(1),
+                date: document.getElementById('scene-date').value,
+                time: document.getElementById('scene-time').value,
+                duration: document.getElementById('scene-duration').value,
+                status: document.getElementById('scene-status').value,
+                cast: document.getElementById('scene-cast').value,
+                equipment: document.getElementById('scene-equipment').value
+            };
+            
+            addSceneToTable(sceneData);
+            saveScheduleData(); // Save after adding a new scene
+            scheduleForm.reset();
+        });
+    }
+
+    // ... (keep the rest of your script, but replace the schedule functions below)
+});
+
+
+// =================================================================
+// --- DATA PERSISTENCE & HANDLING FUNCTIONS (REPLACE THE OLD SCHEDULE FUNCTIONS) ---
+// =================================================================
+
+// --- SCHEDULE DATA FUNCTIONS ---
+function addSceneToTable(sceneData) {
+    const scheduleTableBody = document.getElementById('schedule-table-body');
+    const newRow = scheduleTableBody.insertRow();
+    // Rebuild the table row to include all new fields and data-labels for mobile
+    newRow.innerHTML = `
+        <td data-label="Scene">${sceneData.number}</td>
+        <td data-label="Scene Heading">${sceneData.heading}</td>
+        <td data-label="Date">${sceneData.date}</td>
+        <td data-label="Time">${sceneData.time}</td>
+        <td data-label="Duration">${sceneData.duration}</td>
+        <td data-label="Cast">${sceneData.cast}</td>
+        <td data-label="Equipment">${sceneData.equipment}</td>
+        <td data-label="Status">${sceneData.status}</td>
+        <td data-label="Action"><button class="btn-danger" onclick="deleteRow(this, 'schedule')">Delete</button></td>
+    `;
+}
+
+function saveScheduleData() {
+    const scheduleTableBody = document.getElementById('schedule-table-body');
+    if (!scheduleTableBody) return;
+    const rows = scheduleTableBody.querySelectorAll('tr');
+    const scheduleData = [];
+    rows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        // Rebuild the scene object to save all new fields
+        const scene = {
+            number: cells[0].textContent,
+            heading: cells[1].textContent,
+            date: cells[2].textContent,
+            time: cells[3].textContent,
+            duration: cells[4].textContent,
+            cast: cells[5].textContent,
+            equipment: cells[6].textContent,
+            status: cells[7].textContent
+        };
+        scheduleData.push(scene);
+    });
+    localStorage.setItem('scheduleData', JSON.stringify(scheduleData));
+}
+
+function loadScheduleData() {
+    if (!document.getElementById('schedule-table-body')) return;
+    const scheduleData = JSON.parse(localStorage.getItem('scheduleData')) || [];
+    scheduleData.forEach(scene => addSceneToTable(scene));
+}
+
