@@ -32,7 +32,37 @@
 
     <div class="container">
         <div class="section" id="budgeting">
-            ...
+            <form id="budget-form">
+                <div class="form-grid">
+                    <input type="text" id="item-description" placeholder="Item Description" required>
+                    <select id="item-category">
+                        <option value="Pre-Production">Pre-Production</option>
+                        <option value="Production">Production</option>
+                        <option value="Post-Production">Post-Production</option>
+                        <option value="Talent">Talent</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <input type="number" id="item-cost" placeholder="Cost" min="0" required>
+                </div>
+                <button type="submit" class="btn-primary">Add Line Item</button>
+            </form>
+
+            <table class="data-table" style="margin-top: 20px;">
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th>Category</th>
+                        <th class="align-right">Cost</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="budget-table-body">
+                    </tbody>
+            </table>
+
+            <div class="budget-summary">
+                <h3>Total Budget: <span id="total-budget">$0.00</span></h3>
+            </div>
         </div>
     </div>
     <script src="script.js"></script>
