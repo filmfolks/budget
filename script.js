@@ -55,35 +55,148 @@ document.addEventListener('DOMContentLoaded', () => {
     if(savePdfBtn) savePdfBtn.addEventListener('click', () => alert('Save as PDF functionality would be implemented here.'));
     if(exportSheetsBtn) exportSheetsBtn.addEventListener('click', () => alert('Export to Google Sheets requires API integration.'));
     
-    // --- SCHEDULING PAGE LOGIC (UPDATED) ---
+   // --- SCHEDULING PAGE LOGIC (RE-ARCHITECTED) ---
     if (document.getElementById('schedule-form')) {
         const scheduleForm = document.getElementById('schedule-form');
-
+        
+        // On page load, load data into the central array and render the UI
         loadScheduleData();
 
         scheduleForm.addEventListener('submit', (e) => {
             e.preventDefault();
 
-            const sceneData = {
+            const newScene = {
                 id: Date.now(), // Unique ID for each scene
                 number: document.getElementById('scene-number').value,
                 heading: document.getElementById('scene-heading').value,
-                type: document.getElementById('scene-type').value,
-                location: document.getElementById('scene-location').value,
-                pages: parseFloat(document.getElementById('scene-pages').value).toFixed(1),
                 date: document.getElementById('scene-date').value,
                 time: document.getElementById('scene-time').value,
+                type: document.getElementById('scene-type').value,
+                location: document.getElementById('scene-location').value,
+                pages: document.getElementById('scene-pages').value,
                 duration: document.getElementById('scene-duration').value,
                 status: document.getElementById('scene-status').value,
                 cast: document.getElementById('scene-cast').value,
                 equipment: document.getElementById('scene-equipment').value
             };
             
-            addSceneCard(sceneData); // Add as a card now
-            saveScheduleData(); // Save after adding a new scene
+            // Add the new scene to our central data array
+            scheduleData.push(newScene);
+            
+            // Save the updated array to localStorage
+            saveScheduleData();
+            
+            // Re-render the entire list of scenes from the array
+            renderSchedule();
+            
             scheduleForm.reset();
         });
     }
+});
+
+// =================================================================
+// --- NEW SCHEDULE DATA MANAGEMENT ---
+// =================================================================
+
+// The "Single Source of Truth" for all schedule data
+let scheduleData = [];
+
+// Renders the entire list of scene strips from the scheduleData array
+function renderSchedule() {
+    const container = document.getElementById('scene-strips-container');
+    if (!container) return;
+    
+    container.innerHTML = ''; // Clear the current display
+
+    scheduleData.forEach(scene => {
+        const stripWrapper = document.createElement('div');
+        stripWrapper.className = 'scene-strip-wrapper';
+        stripWrapper.dataset.id = scene.id;
+
+        const statusClass = scene.status.toLowerCase();
+
+        stripWrapper.innerHTML = `
+            <div class="scene-strip" id="scene-strip-${scene.id}">
+                <div class="strip-item"><strong>#${scene.number}</strong></div>
+                <div class="strip-item">${scene.heading}</div>
+                <div class="strip-item">${scene.date}</div>
+                <div class="strip-item">${scene.time}</div>
+                <div class="strip-item">${scene.type}. ${scene.location}</div>
+                <div class="strip-item">Pages: <strong>${scene.pages || 'N/A'}</strong></div>
+                <div class="strip-item">Duration: <strong>${scene.duration || 'N/A'}</strong></div>
+                <div class="strip-item">Cast: <strong>${scene.cast || 'N/A'}</strong></div>
+                <div class="strip-item">Equipment: <strong>${scene.equipment || 'N/A'}</strong></div>
+                <div class="strip-item"><span class="strip-status ${statusClass}">${scene.status}</span></div>
+            </div>
+            <div class="scene-actions">
+                <button class="share-btn-strip" title="Share as Image"><i class="fas fa-share-alt"></i></button>
+                <button class="btn-danger" title="Delete Scene"><i class="fas fa-trash"></i></button>
+            </div>
+        `;
+        
+        // Add event listeners directly to the new buttons
+        stripWrapper.querySelector('.btn-danger').addEventListener('click', () => deleteScene(scene.id));
+        stripWrapper.querySelector('.share-btn-strip').addEventListener('click', () => shareScene(scene.id));
+        
+        container.appendChild(stripWrapper);
+    });
+}
+
+// Loads data from localStorage into our central array
+function loadScheduleData() {
+    const savedData = localStorage.getItem('scheduleData');
+    scheduleData = savedData ? JSON.parse(savedData) : [];
+    renderSchedule();
+}
+
+// Saves the central array to localStorage
+function saveScheduleData() {
+    localStorage.setItem('scheduleData', JSON.stringify(scheduleData));
+}
+
+// Deletes a scene by its ID, saves, and re-renders
+function deleteScene(id) {
+    if (confirm('Are you sure you want to delete this scene?')) {
+        scheduleData = scheduleData.filter(scene => scene.id !== id);
+        saveScheduleData();
+        renderSchedule();
+    }
+}
+
+// Shares a scene as an image using html2canvas and the Web Share API
+async function shareScene(id) {
+    const stripElement = document.getElementById(`scene-strip-${id}`);
+    if (!stripElement) return;
+
+    try {
+        const canvas = await html2canvas(stripElement, {
+            backgroundColor: '#111827', // Match the app's background
+            scale: 2 // Higher resolution image
+        });
+        
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+        
+        const file = new File([blob], `scene_${id}.png`, { type: 'image/png' });
+        
+        // Use the Web Share API if available (great for mobile)
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({
+                files: [file],
+                title: `Shooting Schedule - Scene`,
+                text: `Details for scene.`
+            });
+        } else {
+            // Fallback for desktop browsers
+            alert("Share API not supported. On mobile, this would open the native share dialog. As a fallback, you can right-click the image to save it.");
+            const imgUrl = URL.createObjectURL(blob);
+            window.open(imgUrl, '_blank');
+        }
+    } catch (error) {
+        console.error('Sharing failed:', error);
+        alert('Could not generate image for sharing. Please try again.');
+    }
+}
+
 
     // --- BUDGETING PAGE LOGIC ---
     if (document.getElementById('budget-form')) {
