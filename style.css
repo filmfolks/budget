@@ -138,6 +138,12 @@ button, .btn-secondary { padding: 10px 20px; border-radius: 6px; font-size: 1rem
 .budget-summary h3 { margin: 0; font-size: 1.8rem; font-weight: 700; }
 .budget-summary span { color: var(--success-color); }
 
+/* Style for new date/time inputs */
+input[type="date"], input[type="time"] {
+    color-scheme: dark;
+    -webkit-appearance: none; /* Helps with consistent styling on some browsers */
+}
+
 /* --- REMOVED MODAL STYLES --- */
 
 @media (max-width: 768px) {
