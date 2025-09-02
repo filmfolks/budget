@@ -6,13 +6,24 @@
     <title>FilmPro Dashboard</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* This small style block helps center the main title perfectly */
+        .main-header {
+            position: relative;
+            text-align: center;
+        }
+        .main-header .icon-btn {
+            position: absolute;
+            top: 50%;
+            right: 30px;
+            transform: translateY(-50%);
+        }
+    </style>
 </head>
 <body class="home-body">
     <header class="main-header">
-        <div class="header-content">
-            <h1>🎬 FilmPro Dashboard</h1>
-            <button id="settings-btn" class="icon-btn"><i class="fas fa-cog"></i></button>
-        </div>
+        <h1>🎬 FilmPro Dashboard</h1>
+        <button id="settings-btn" class="icon-btn"><i class="fas fa-cog"></i></button>
     </header>
 
     <main class="home-container">
@@ -27,6 +38,22 @@
                 <i class="fas fa-wallet fa-3x"></i>
                 <h3>Production Budget</h3>
                 <p>Track expenses and manage your production costs.</p>
+            </a>
+
+            <a href="#" class="choice-card">
+                <i class="fas fa-th-large fa-3x"></i>
+                <h3>Storyboard</h3>
+                <p>Visualize your shots, sequences, and camera angles.</p>
+            </a>
+            <a href="#" class="choice-card">
+                <i class="fas fa-file-alt fa-3x"></i>
+                <h3>Scriptwriting</h3>
+                <p>Write, format, and break down your screenplay.</p>
+            </a>
+            <a href="#" class="choice-card">
+                <i class="fas fa-lightbulb fa-3x"></i>
+                <h3>Notes & Ideas</h3>
+                <p>Jot down concepts, character notes, and thoughts.</p>
             </a>
         </div>
     </main>
