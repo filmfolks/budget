@@ -3,18 +3,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Global & Shared Elements ---
     const hamburgerBtn = document.getElementById('hamburger-btn');
     const dropdownMenu = document.getElementById('dropdown-menu');
-    const settingsBtn = document.getElementById('settings-btn');
-    const settingsModal = document.getElementById('settings-modal');
-    const closeModalBtn = document.querySelector('.close-btn');
-    const saveSettingsBtn = document.getElementById('save-settings-btn');
-    const currencySelect = document.getElementById('currency-select');
     
-    // Retrieve currency from localStorage or default to USD
-    let currentCurrency = localStorage.getItem('userCurrency') || 'USD';
-    
-    // --- Shared Functions ---
+    // Placeholder for new index page hamburger button
+    const indexHamburgerBtn = document.getElementById('hamburger-btn-index');
+    if (indexHamburgerBtn) {
+        indexHamburgerBtn.addEventListener('click', () => {
+            alert('Navigation menu would open here.');
+        });
+    }
 
-    // Hamburger Menu Logic
+    // --- Shared Functions ---
+    // Hamburger Menu Logic (for internal pages)
     if (hamburgerBtn) {
         hamburgerBtn.addEventListener('click', () => {
             dropdownMenu.classList.toggle('show');
@@ -27,38 +26,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if(savePdfBtn) savePdfBtn.addEventListener('click', () => alert('Save as PDF functionality would be implemented here.'));
     if(exportSheetsBtn) exportSheetsBtn.addEventListener('click', () => alert('Export to Google Sheets requires API integration.'));
 
-
-    // Settings Modal Logic
-    if (settingsBtn) {
-        settingsBtn.addEventListener('click', () => settingsModal.style.display = 'block');
-    }
-    if (closeModalBtn) {
-        closeModalBtn.addEventListener('click', () => settingsModal.style.display = 'none');
-    }
-    if (saveSettingsBtn) {
-        saveSettingsBtn.addEventListener('click', () => {
-            localStorage.setItem('userCurrency', currencySelect.value);
-            currentCurrency = currencySelect.value;
-            alert('Settings saved!');
-            settingsModal.style.display = 'none';
-            // If on budget page, we need to re-render the costs
-            if (document.getElementById('budget-table-body')) {
-                updateTotalBudget();
-            }
-        });
-    }
+    // --- REMOVED SETTINGS MODAL LOGIC ---
     
-    // Close modal if clicking outside of it
-    window.onclick = (event) => {
-        if (event.target == settingsModal) {
-            settingsModal.style.display = "none";
-        }
-    };
-
-
     // --- Page Specific Logic ---
     
-    // SCHEDULING PAGE LOGIC
+    // SCHEDULING PAGE LOGIC (No changes here)
     if (document.getElementById('schedule-form')) {
         const scheduleForm = document.getElementById('schedule-form');
         const scheduleTableBody = document.getElementById('schedule-table-body');
@@ -72,7 +44,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const pages = parseFloat(document.getElementById('scene-pages').value).toFixed(1);
 
             const newRow = scheduleTableBody.insertRow();
-            // *** UPDATED: Added data-label attributes for mobile view ***
             newRow.innerHTML = `
                 <td data-label="Scene">${sceneNumber}</td>
                 <td data-label="Description">${description}</td>
@@ -90,7 +61,23 @@ document.addEventListener('DOMContentLoaded', () => {
         const budgetForm = document.getElementById('budget-form');
         const budgetTableBody = document.getElementById('budget-table-body');
         const totalBudgetEl = document.getElementById('total-budget');
+        const currencySelect = document.getElementById('currency-select');
         
+        // Retrieve currency from localStorage or default to USD
+        let currentCurrency = localStorage.getItem('userCurrency') || 'USD';
+        
+        // *** NEW: Set dropdown to saved currency on page load ***
+        currencySelect.value = currentCurrency;
+        
+        // *** NEW: Event listener for the currency dropdown ***
+        currencySelect.addEventListener('change', () => {
+            currentCurrency = currencySelect.value;
+            localStorage.setItem('userCurrency', currentCurrency);
+            // Update placeholder and totals when currency changes
+            document.getElementById('item-cost').placeholder = `Cost (${getCurrencySymbol(currentCurrency)})`;
+            updateTotalBudget();
+        });
+
         // On page load, set the correct currency in the placeholder
         document.getElementById('item-cost').placeholder = `Cost (${getCurrencySymbol(currentCurrency)})`;
         
@@ -106,7 +93,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const newRow = budgetTableBody.insertRow();
-            // *** UPDATED: Added data-label attributes for mobile view ***
             newRow.innerHTML = `
                 <td data-label="Description">${description}</td>
                 <td data-label="Category">${category}</td>
@@ -128,29 +114,27 @@ document.addEventListener('DOMContentLoaded', () => {
             totalBudgetEl.textContent = formatCurrency(total);
         };
         
+        window.formatCurrency = (amount) => {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: currentCurrency,
+            }).format(amount);
+        };
+    
+        window.getCurrencySymbol = (currencyCode) => {
+            const symbols = { 'USD': '$', 'EUR': '€', 'INR': '₹', 'GBP': '£' };
+            return symbols[currencyCode] || '$';
+        }
+        
         updateTotalBudget(); // Initial calculation
     }
     
     // --- Global Functions needed on multiple pages ---
-    
     window.deleteRow = (button) => {
         const row = button.closest('tr');
         row.remove();
-        // If it's a budget row, update the total
         if (row.querySelector('[data-cost]')) {
             updateTotalBudget();
         }
     };
-    
-    const formatCurrency = (amount) => {
-        return new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: currentCurrency,
-        }).format(amount);
-    };
-    
-    const getCurrencySymbol = (currencyCode) => {
-        const symbols = { 'USD': '$', 'EUR': '€', 'INR': '₹', 'GBP': '£' };
-        return symbols[currencyCode] || '$';
-    }
 });
