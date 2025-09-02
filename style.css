@@ -84,25 +84,20 @@ body {
 .choice-card h3 { margin: 15px 0 10px; font-size: 1.5rem; }
 .choice-card p { color: #9ca3af; font-size: 0.9rem; line-height: 1.5; }
 
-/* --- Currency Selector on Budget Page --- */
-.currency-selector-wrapper {
-    margin-right: 10px; /* Adds a little space next to the title */
-}
-
+/* FIND AND REPLACE the old currency selector styles with this */
 .currency-selector-wrapper select {
     background-color: var(--background-color);
     border: 1px solid var(--border-color);
     color: var(--text-color);
-    font-size: 0.9rem; /* Smaller font */
+    font-size: 0.9rem;
     font-weight: 600;
-    padding: 5px 8px; /* Reduced padding */
+    padding: 5px 8px;
     border-radius: 6px;
     cursor: pointer;
-    -webkit-appearance: none; /* Removes default system appearance */
+    -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
 }
-
 .currency-selector-wrapper select:focus {
     outline: none;
     border-color: var(--primary-color);
