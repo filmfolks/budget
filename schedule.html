@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shooting Schedule - FilmPro</title>
+    <title>Shooting Schedule - FilmFolks Pro</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
@@ -27,13 +27,25 @@
              <form id="schedule-form">
                 <div class="form-grid">
                     <input type="text" id="scene-number" placeholder="Scene #" required>
-                    <input type="text" id="scene-description" placeholder="Scene Description" required>
+                    <input type="text" id="scene-heading" placeholder="Scene Heading" required>
                     <select id="scene-type">
                         <option value="INT">INT.</option>
                         <option value="EXT">EXT.</option>
                     </select>
                     <input type="text" id="scene-location" placeholder="Location" required>
-                    <input type="number" id="scene-pages" placeholder="Pages (e.g., 1.5)" step="0.1" required>
+                    <input type="number" id="scene-pages" placeholder="Pages" step="0.1" required>
+                    
+                    <input type="date" id="scene-date" title="Shooting Date" required>
+                    <input type="time" id="scene-time" title="Shooting Time" required>
+                    <input type="text" id="scene-duration" placeholder="Duration (e.g., 2h 30m)">
+                     <select id="scene-status">
+                        <option value="Pending">Pending</option>
+                        <option value="Incomplete">Incomplete</option>
+                        <option value="Done">Done</option>
+                    </select>
+
+                    <input type="text" id="scene-cast" placeholder="Cast (e.g., John, Mary)">
+                    <input type="text" id="scene-equipment" placeholder="Key Equipment">
                 </div>
                 <button type="submit" class="btn-primary">Add Scene</button>
             </form>
@@ -42,10 +54,13 @@
                 <thead>
                     <tr>
                         <th>Scene</th>
-                        <th>Description</th>
-                        <th>Type</th>
-                        <th>Location</th>
-                        <th>Pages</th>
+                        <th>Scene Heading</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Duration</th>
+                        <th>Cast</th>
+                        <th>Equipment</th>
+                        <th>Status</th>
                         <th>Action</th>
                     </tr>
                 </thead>
