@@ -18,42 +18,43 @@ body {
 }
 
 /* --- Header Styles --- */
-.main-header, .page-header {
+.main-header {
     background-color: var(--surface-color);
     padding: 15px 30px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     border-bottom: 2px solid var(--border-color);
-    position: relative;
-}
-.main-header h1 {
-    width: 100%;
     text-align: center;
-    margin: 0;
+}
+.main-header .header-left, .main-header .header-right {
+    flex: 1;
+}
+.main-header .header-left { text-align: left; }
+.main-header .header-right { text-align: right; }
+.main-header .header-center { flex: 3; }
+.main-header h1 { margin: 0; }
+.main-header p { margin: 5px 0 0; color: #9ca3af; }
+
+.page-header {
+    background-color: var(--surface-color);
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid var(--border-color);
+}
+.page-header .header-left, .page-header .header-right { 
+    display: flex; 
+    align-items: center; 
+    gap: 15px; 
 }
 .page-header h2 { margin: 0; }
-.page-header .header-left { display: flex; align-items: center; gap: 15px; }
-
-/* Special style for settings button on main header */
-.main-header .icon-btn {
-    position: absolute;
-    top: 50%;
-    right: 30px;
-    transform: translateY(-50%);
-}
-
 
 /* --- Homepage Styles --- */
 .home-body { display: flex; flex-direction: column; min-height: 100vh; }
-.home-container {
-    text-align: center;
-    margin: auto;
-    padding: 20px;
-}
-.home-container h2 {
-    font-size: 2rem;
-}
+.home-container { text-align: center; margin: auto; padding: 20px; }
+.home-container h2 { font-size: 2rem; }
 .choice-container {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -77,19 +78,35 @@ body {
 .choice-card h3 { margin: 15px 0 10px; font-size: 1.5rem; }
 .choice-card p { color: #9ca3af; font-size: 0.9rem; line-height: 1.5; }
 
-/* --- General Content Styles --- */
-.container {
-    max-width: 1400px;
-    margin: 20px auto;
-    padding: 0 20px;
-}
-
-.section {
-    background-color: var(--surface-color);
-    padding: 25px;
-    border-radius: 8px;
+/* --- Currency Selector on Budget Page --- */
+.currency-selector-wrapper {
+    display: flex;
+    align-items: center;
+    background-color: var(--background-color);
+    padding: 5px 10px;
+    border-radius: 6px;
     border: 1px solid var(--border-color);
 }
+.currency-selector-wrapper label {
+    color: var(--primary-color);
+    margin-right: 8px;
+}
+.currency-selector-wrapper select {
+    background: transparent;
+    border: none;
+    color: var(--text-color);
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 5px;
+    cursor: pointer;
+}
+.currency-selector-wrapper select:focus {
+    outline: none;
+}
+
+/* --- General Content Styles --- */
+.container { max-width: 1400px; margin: 20px auto; padding: 0 20px; }
+.section { background-color: var(--surface-color); padding: 25px; border-radius: 8px; border: 1px solid var(--border-color); }
 .section-header h2 { font-size: 1.5rem; margin: 0; }
 
 /* --- Form & Input Styling --- */
@@ -122,132 +139,28 @@ button, .btn-secondary { padding: 10px 20px; border-radius: 6px; font-size: 1rem
 .budget-summary h3 { margin: 0; font-size: 1.8rem; font-weight: 700; }
 .budget-summary span { color: var(--success-color); }
 
-/* --- Settings Modal --- */
-.modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.6); }
-.modal-content { background-color: var(--surface-color); margin: 15% auto; padding: 30px; border: 1px solid var(--border-color); width: 80%; max-width: 400px; border-radius: 12px; position: relative; }
-.close-btn { color: #aaa; position: absolute; top: 10px; right: 20px; font-size: 28px; font-weight: bold; cursor: pointer; }
-.form-group { margin-bottom: 20px; }
-.form-group label { display: block; margin-bottom: 8px; }
+/* --- REMOVED MODAL STYLES --- */
 
-
-/*
-=========================================
---- Responsive Design for Mobile ---
-=========================================
-*/
 @media (max-width: 768px) {
-    body {
-        padding: 5px;
-        font-size: 14px;
-    }
-
-    /* --- Homepage Mobile Styles --- */
-    .home-container h2 {
-        font-size: 1.5rem;
-    }
-
-    .choice-container {
-        grid-template-columns: 1fr; /* Stack cards vertically */
-        gap: 15px;
-    }
-
-    .choice-card {
-        padding: 20px; /* Reduce card padding */
-    }
+    body { padding: 5px; font-size: 14px; }
+    .home-container h2 { font-size: 1.5rem; }
+    .choice-container { grid-template-columns: 1fr; gap: 15px; }
+    .choice-card { padding: 20px; }
     .choice-card h3 { font-size: 1.2rem; }
-
-    /* --- Header Mobile Styles --- */
-    .main-header, .page-header {
-        padding: 10px 15px;
-        flex-wrap: wrap;
-        gap: 10px;
-    }
-
-    .main-header h1 {
-        font-size: 1.5rem;
-        order: 1; /* Ensure title is first */
-    }
-    
-    .main-header .icon-btn {
-        order: 2; /* Ensure button is second */
-        position: static; /* Remove absolute positioning */
-        transform: none; /* Remove transform */
-    }
-
-    .page-header {
-        justify-content: center;
-    }
-
-    .page-header .header-left {
-        order: 2;
-    }
-
-    .page-header .header-right {
-        order: 1;
-        width: 100%;
-        text-align: center;
-    }
-
-    /* --- Table Mobile Styles (Card View) --- */
-    .data-table thead {
-        display: none; /* Hide table headers, we'll use data-labels instead */
-    }
-
-    .data-table, .data-table tbody, .data-table tr, .data-table td {
-        display: block; /* Make table elements stack */
-        width: 100%;
-        box-sizing: border-box;
-    }
-
-    .data-table tr {
-        margin-bottom: 15px;
-        border: 1px solid var(--border-color);
-        border-radius: 6px;
-        padding: 5px 10px;
-    }
-    
-    .data-table td {
-        text-align: right; /* Align cell content to the right */
-        position: relative;
-        padding-left: 50%; /* Create space for the label */
-        border-bottom: 1px dotted var(--border-color);
-        padding-top: 10px;
-        padding-bottom: 10px;
-    }
-
-    .data-table td:last-child {
-        border-bottom: none;
-    }
-    
-    /* Add labels to the cells using the 'data-label' attribute from HTML */
-    .data-table td::before {
-        content: attr(data-label); /* Use data-label for the content */
-        position: absolute;
-        left: 10px;
-        font-weight: bold;
-        text-align: left;
-        color: #9ca3af;
-    }
-    
-    /* --- Form, Section & Modal Mobile Styles --- */
-    .container {
-        padding: 0 10px;
-    }
-    .section {
-        padding: 15px;
-    }
-
-    .form-grid {
-        grid-template-columns: 1fr; /* Stack form inputs */
-    }
-
-    .budget-summary h3 {
-        font-size: 1.2rem;
-    }
-    
-    .modal-content {
-        width: 90%;
-        margin: 20% auto;
-        padding: 20px;
-    }
+    .main-header { padding: 15px; }
+    .main-header h1 { font-size: 1.5rem; }
+    .main-header p { font-size: 0.8rem; }
+    .page-header { padding: 10px 15px; flex-wrap: wrap; gap: 10px; justify-content: center; }
+    .page-header .header-left { order: 1; }
+    .page-header .header-right { order: 2; width: 100%; justify-content: center; }
+    .data-table thead { display: none; }
+    .data-table, .data-table tbody, .data-table tr, .data-table td { display: block; width: 100%; box-sizing: border-box; }
+    .data-table tr { margin-bottom: 15px; border: 1px solid var(--border-color); border-radius: 6px; padding: 5px 10px; }
+    .data-table td { text-align: right; position: relative; padding-left: 50%; border-bottom: 1px dotted var(--border-color); padding-top: 10px; padding-bottom: 10px; }
+    .data-table td:last-child { border-bottom: none; }
+    .data-table td::before { content: attr(data-label); position: absolute; left: 10px; font-weight: bold; text-align: left; color: #9ca3af; }
+    .container { padding: 0 10px; }
+    .section { padding: 15px; }
+    .form-grid { grid-template-columns: 1fr; }
+    .budget-summary h3 { font-size: 1.2rem; }
 }
