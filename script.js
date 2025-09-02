@@ -85,8 +85,43 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- BUDGETING PAGE LOGIC ---
+    // This section is kept for completeness, no changes here.
     if (document.getElementById('budget-form')) {
-        // ... (Budget logic remains the same)
+        const budgetForm = document.getElementById('budget-form');
+        const currencySelect = document.getElementById('currency-select');
+        
+        loadBudgetData();
+        
+        let currentCurrency = localStorage.getItem('userCurrency') || 'USD';
+        currencySelect.value = currentCurrency;
+        
+        currencySelect.addEventListener('change', () => {
+            currentCurrency = currencySelect.value;
+            localStorage.setItem('userCurrency', currentCurrency);
+            document.getElementById('item-cost').placeholder = `Cost (${getCurrencySymbol(currentCurrency)})`;
+            updateTotalBudget();
+        });
+
+        document.getElementById('item-cost').placeholder = `Cost (${getCurrencySymbol(currentCurrency)})`;
+        
+        budgetForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const cost = parseFloat(document.getElementById('item-cost').value);
+            if (isNaN(cost)) {
+                alert('Please enter a valid cost.');
+                return;
+            }
+
+            const budgetData = {
+                description: document.getElementById('item-description').value,
+                category: document.getElementById('item-category').value,
+                cost: cost
+            };
+
+            addBudgetItemToTable(budgetData);
+            saveBudgetData();
+            budgetForm.reset();
+        });
     }
 });
 
@@ -158,7 +193,10 @@ async function shareScene(id) {
     const template = document.getElementById('share-card-template');
     const scene = scheduleData.find(s => s.id === id); 
 
-    if (!template || !scene) return;
+    if (!template || !scene) {
+        alert("Error: Could not find scene data or template.");
+        return;
+    }
 
     template.innerHTML = `
         <div class="share-card-content">
@@ -192,7 +230,6 @@ async function shareScene(id) {
     }
 }
 
-// --- UTILITY FUNCTIONS ---
 function formatTime12Hour(timeString) {
     if (!timeString) return "N/A";
     const [hour, minute] = timeString.split(':');
@@ -201,9 +238,6 @@ function formatTime12Hour(timeString) {
     const hour12 = hourInt % 12 || 12;
     return `${hour12}:${minute} ${ampm}`;
 }
-
-// --- ALL OTHER FUNCTIONS (BUDGET, PROJECT SAVE/LOAD) REMAIN THE SAME ---
-// ... (Your existing code for budgeting, etc., would go here)    
 
 // --- BUDGETING PAGE LOGIC ---
     if (document.getElementById('budget-form')) {
