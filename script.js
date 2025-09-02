@@ -1,10 +1,11 @@
 // =================================================================
-// --- GLOBAL INITIALIZATION & EVENT LISTENERS ---
+// --- GLOBAL STATE & INITIALIZATION ---
 // =================================================================
 
 // The "Single Source of Truth" for all schedule data.
-// This array holds the scene objects, is saved to localStorage, and is used to render the UI.
 let scheduleData = [];
+// Remembers the last contact person entered.
+let lastContactPerson = '';
 
 document.addEventListener('DOMContentLoaded', () => {
     
@@ -21,15 +22,13 @@ document.addEventListener('DOMContentLoaded', () => {
             indexDropdownMenu.classList.toggle('show');
         });
     }
-    if (saveProjectBtn) {
-        saveProjectBtn.addEventListener('click', saveProjectFile);
-    }
+    if (saveProjectBtn) saveProjectBtn.addEventListener('click', saveProjectFile);
     if (openProjectBtn) {
         openProjectBtn.addEventListener('click', () => fileInput.click());
         fileInput.addEventListener('change', openProjectFile);
     }
 
-    // --- INTERNAL PAGES LOGIC (Schedule, Budget) ---
+    // --- INTERNAL PAGES LOGIC ---
     const hamburgerBtn = document.getElementById('hamburger-btn');
     const dropdownMenu = document.getElementById('dropdown-menu');
 
@@ -40,7 +39,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // Close dropdowns if clicked outside
     document.addEventListener('click', (event) => {
         if (indexDropdownMenu && !indexDropdownMenu.contains(event.target) && !indexHamburgerBtn.contains(event.target)) {
             indexDropdownMenu.classList.remove('show');
@@ -49,24 +47,17 @@ document.addEventListener('DOMContentLoaded', () => {
             dropdownMenu.classList.remove('show');
         }
     });
-
-    const savePdfBtn = document.getElementById('save-pdf-btn');
-    if (savePdfBtn) savePdfBtn.addEventListener('click', () => alert('Save as PDF functionality would be implemented here.'));
     
-    const exportSheetsBtn = document.getElementById('export-sheets-btn');
-    if (exportSheetsBtn) exportSheetsBtn.addEventListener('click', () => alert('Export to Google Sheets requires API integration.'));
-    
-
     // --- SCHEDULING PAGE LOGIC ---
     if (document.getElementById('schedule-form')) {
         const scheduleForm = document.getElementById('schedule-form');
-        // On page load, load data into the global array and render the UI
+        const contactInput = document.getElementById('scene-contact');
+        
         loadScheduleData();
+        if (contactInput) contactInput.value = lastContactPerson;
 
         scheduleForm.addEventListener('submit', (e) => {
             e.preventDefault();
-
-            // Create a new scene object directly from the form field values
             const newScene = {
                 id: Date.now(),
                 number: document.getElementById('scene-number').value,
@@ -79,24 +70,142 @@ document.addEventListener('DOMContentLoaded', () => {
                 duration: document.getElementById('scene-duration').value,
                 status: document.getElementById('scene-status').value,
                 cast: document.getElementById('scene-cast').value,
-                equipment: document.getElementById('scene-equipment').value
+                equipment: document.getElementById('scene-equipment').value,
+                contact: document.getElementById('scene-contact').value,
             };
             
-            // Add the new scene object to our central data array
+            lastContactPerson = newScene.contact;
             scheduleData.push(newScene);
-            
-            // Save the entire updated array to localStorage
             saveScheduleData();
-            
-            // Re-render the complete list of scenes from the array
             renderSchedule();
             
-            // Reset the form for the next entry
             scheduleForm.reset();
+            document.getElementById('scene-contact').value = lastContactPerson;
         });
     }
 
     // --- BUDGETING PAGE LOGIC ---
+    if (document.getElementById('budget-form')) {
+        // ... (Budget logic remains the same)
+    }
+});
+
+
+// =================================================================
+// --- SCHEDULE DATA MANAGEMENT ---
+// =================================================================
+
+function renderSchedule() {
+    const container = document.getElementById('scene-strips-container');
+    if (!container) return;
+    
+    container.innerHTML = ''; 
+
+    scheduleData.forEach(scene => {
+        const stripWrapper = document.createElement('div');
+        stripWrapper.className = 'scene-strip-wrapper';
+        stripWrapper.dataset.id = scene.id;
+        const statusClass = scene.status.toLowerCase();
+
+        stripWrapper.innerHTML = `
+            <div class="scene-strip" id="scene-strip-${scene.id}">
+                <div class="strip-item"><strong>#${scene.number}</strong></div>
+                <div class="strip-item">${scene.heading}</div>
+                <div class="strip-item">${scene.date}</div>
+                <div class="strip-item">${scene.time}</div>
+                <div class="strip-item">${scene.type}. ${scene.location}</div>
+                <div class="strip-item">Pages: <strong>${scene.pages || 'N/A'}</strong></div>
+                <div class="strip-item">Duration: <strong>${scene.duration || 'N/A'}</strong></div>
+                <div class="strip-item">Cast: <strong>${scene.cast || 'N/A'}</strong></div>
+                <div class="strip-item">Equipment: <strong>${scene.equipment || 'N/A'}</strong></div>
+                <div class="strip-item"><span class="strip-status ${statusClass}">${scene.status}</span></div>
+            </div>
+            <div class="scene-actions">
+                <button class="share-btn-strip" title="Share as Image"><i class="fas fa-share-alt"></i></button>
+                <button class="btn-danger" title="Delete Scene"><i class="fas fa-trash"></i></button>
+            </div>
+        `;
+        
+        stripWrapper.querySelector('.btn-danger').addEventListener('click', () => deleteScene(scene.id));
+        stripWrapper.querySelector('.share-btn-strip').addEventListener('click', () => shareScene(scene.id));
+        
+        container.appendChild(stripWrapper);
+    });
+}
+
+function loadScheduleData() {
+    const savedData = localStorage.getItem('scheduleData');
+    scheduleData = savedData ? JSON.parse(savedData) : [];
+    if (scheduleData.length > 0) {
+        lastContactPerson = scheduleData[scheduleData.length - 1].contact || '';
+    }
+    renderSchedule();
+}
+
+function saveScheduleData() {
+    localStorage.setItem('scheduleData', JSON.stringify(scheduleData));
+}
+
+function deleteScene(id) {
+    if (confirm('Are you sure you want to delete this scene?')) {
+        scheduleData = scheduleData.filter(scene => scene.id !== id);
+        saveScheduleData();
+        renderSchedule();
+    }
+}
+
+async function shareScene(id) {
+    const template = document.getElementById('share-card-template');
+    const scene = scheduleData.find(s => s.id === id); 
+
+    if (!template || !scene) return;
+
+    template.innerHTML = `
+        <div class="share-card-content">
+            <div class="share-card-header">
+                <h1>Scene #${scene.number}</h1>
+                <h2>${scene.heading}</h2>
+            </div>
+            <p class="share-card-item"><strong>Date:</strong> ${scene.date}</p>
+            <p class="share-card-item"><strong>Time:</strong> ${formatTime12Hour(scene.time)}</p>
+            <p class="share-card-item"><strong>Location:</strong> ${scene.type}. ${scene.location}</p>
+            <p class="share-card-item"><strong>Cast:</strong> ${scene.cast || 'N/A'}</p>
+            <p class="share-card-item"><strong>Contact:</strong> 📞 ${scene.contact || 'N/A'}</p>
+            <div class="share-card-footer">Generated by FilmFolks Pro</div>
+        </div>
+    `;
+
+    try {
+        const canvas = await html2canvas(template, { scale: 2 });
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+        const file = new File([blob], `scene_${scene.number}.png`, { type: 'image/png' });
+        
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({ files: [file], title: `Shooting Schedule - Scene ${scene.number}` });
+        } else {
+            const imgUrl = URL.createObjectURL(blob);
+            window.open(imgUrl, '_blank');
+        }
+    } catch (error) {
+        console.error('Sharing failed:', error);
+        alert('Could not generate image for sharing.');
+    }
+}
+
+// --- UTILITY FUNCTIONS ---
+function formatTime12Hour(timeString) {
+    if (!timeString) return "N/A";
+    const [hour, minute] = timeString.split(':');
+    const hourInt = parseInt(hour, 10);
+    const ampm = hourInt >= 12 ? 'PM' : 'AM';
+    const hour12 = hourInt % 12 || 12;
+    return `${hour12}:${minute} ${ampm}`;
+}
+
+// --- ALL OTHER FUNCTIONS (BUDGET, PROJECT SAVE/LOAD) REMAIN THE SAME ---
+// ... (Your existing code for budgeting, etc., would go here)    
+
+// --- BUDGETING PAGE LOGIC ---
     if (document.getElementById('budget-form')) {
         const budgetForm = document.getElementById('budget-form');
         const currencySelect = document.getElementById('currency-select');
@@ -135,130 +244,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
-
-
-// --- SCHEDULING PAGE LOGIC ---
-    if (document.getElementById('schedule-form')) {
-        const scheduleForm = document.getElementById('schedule-form');
-        const contactInput = document.getElementById('scene-contact');
-        
-        // Load data, which will also populate the 'lastContactPerson' variable
-        loadScheduleData();
-        // Set the contact field to the last known value
-        if(contactInput) contactInput.value = lastContactPerson;
-
-        scheduleForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-
-            // Create a new scene object, including the new contact field
-            const newScene = {
-                id: Date.now(),
-                number: document.getElementById('scene-number').value,
-                heading: document.getElementById('scene-heading').value,
-                date: document.getElementById('scene-date').value,
-                time: document.getElementById('scene-time').value,
-                type: document.getElementById('scene-type').value,
-                location: document.getElementById('scene-location').value,
-                pages: document.getElementById('scene-pages').value,
-                duration: document.getElementById('scene-duration').value,
-                status: document.getElementById('scene-status').value,
-                cast: document.getElementById('scene-cast').value,
-                equipment: document.getElementById('scene-equipment').value,
-                contact: document.getElementById('scene-contact').value, // Get new contact value
-            };
-            
-            // Remember this contact for the next scene
-            lastContactPerson = newScene.contact;
-
-            scheduleData.push(newScene);
-            saveScheduleData();
-            renderSchedule();
-            
-            scheduleForm.reset();
-            // After resetting, restore the contact person's name
-            document.getElementById('scene-contact').value = lastContactPerson;
-        });
-    }
-});
-
-
-// =================================================================
-// --- SCHEDULE DATA MANAGEMENT ---
-// =================================================================
-
-/**
- * Loads data from localStorage, updates the central scheduleData array,
- * sets the lastContactPerson, and renders the UI.
- */
-function loadScheduleData() {
-    const savedData = localStorage.getItem('scheduleData');
-    scheduleData = savedData ? JSON.parse(savedData) : [];
-    // If there's saved data, set the last known contact person
-    if (scheduleData.length > 0) {
-        lastContactPerson = scheduleData[scheduleData.length - 1].contact || '';
-    }
-    renderSchedule();
-}
-
-/**
- * Saves the central array (including contact info) to localStorage.
- */
-function saveScheduleData() {
-    localStorage.setItem('scheduleData', JSON.stringify(scheduleData));
-}
-
-/**
- * Renders the scene strips from the central data array.
- * This function does not need major changes.
- */
-function renderSchedule() {
-    // ... (This function remains the same as the previous version)
-    const container = document.getElementById('scene-strips-container');
-    if (!container) return;
-    container.innerHTML = '';
-    scheduleData.forEach(scene => {
-        const stripWrapper = document.createElement('div');
-        stripWrapper.className = 'scene-strip-wrapper';
-        stripWrapper.dataset.id = scene.id;
-        const statusClass = scene.status.toLowerCase();
-
-        stripWrapper.innerHTML = `
-            <div class="scene-strip" id="scene-strip-${scene.id}">
-                <div class="strip-item"><strong>#${scene.number}</strong></div>
-                <div class="strip-item">${scene.heading}</div>
-                <div class="strip-item">${scene.date}</div>
-                <div class="strip-item">${scene.time}</div>
-                <div class="strip-item">${scene.type}. ${scene.location}</div>
-                <div class="strip-item">Pages: <strong>${scene.pages || 'N/A'}</strong></div>
-                <div class="strip-item">Duration: <strong>${scene.duration || 'N/A'}</strong></div>
-                <div class="strip-item">Cast: <strong>${scene.cast || 'N/A'}</strong></div>
-                <div class="strip-item">Equipment: <strong>${scene.equipment || 'N/A'}</strong></div>
-                <div class="strip-item"><span class="strip-status ${statusClass}">${scene.status}</span></div>
-            </div>
-            <div class="scene-actions">
-                <button class="share-btn-strip" title="Share as Image"><i class="fas fa-share-alt"></i></button>
-                <button class="btn-danger" title="Delete Scene"><i class="fas fa-trash"></i></button>
-            </div>
-        `;
-        
-        stripWrapper.querySelector('.btn-danger').addEventListener('click', () => deleteScene(scene.id));
-        stripWrapper.querySelector('.share-btn-strip').addEventListener('click', () => shareScene(scene.id));
-        
-        container.appendChild(stripWrapper);
-    });
-}
-
-/**
- * Deletes a scene and updates the UI.
- * This function does not need changes.
- */
-function deleteScene(id) {
-    if (confirm('Are you sure you want to delete this scene?')) {
-        scheduleData = scheduleData.filter(scene => scene.id !== id);
-        saveScheduleData();
-        renderSchedule();
-    }
-}
 
 
 // =================================================================
@@ -363,75 +348,6 @@ function openProjectFile(event) {
     reader.readAsText(file);
 }
 
-// =================================================================
-// --- NEW AND UPDATED UTILITY FUNCTIONS ---
-// =================================================================
-
-/**
- * Formats a 24-hour time string (e.g., "14:30") to a 12-hour AM/PM format (e.g., "2:30 PM").
- */
-function formatTime12Hour(timeString) {
-    if (!timeString) return "N/A";
-    const [hour, minute] = timeString.split(':');
-    const hourInt = parseInt(hour, 10);
-    const ampm = hourInt >= 12 ? 'PM' : 'AM';
-    const hour12 = hourInt % 12 || 12; // Convert hour 0 to 12
-    return `${hour12}:${minute} ${ampm}`;
-}
-
-/**
- * REWRITTEN: Shares a scene by generating a vertical image card from the hidden template.
- */
-async function shareScene(id) {
-    const template = document.getElementById('share-card-template');
-    const scene = scheduleData.find(s => s.id === id); // Find the scene data from our central array
-
-    if (!template || !scene) {
-        alert("Error: Could not find scene data or template.");
-        return;
-    }
-
-    // 1. Populate the hidden template with the scene's data
-    template.innerHTML = `
-        <div class="share-card-content">
-            <div class="share-card-header">
-                <h1>Scene #${scene.number}</h1>
-                <h2>${scene.heading}</h2>
-            </div>
-            <p class="share-card-item"><strong>Date:</strong> ${scene.date}</p>
-            <p class="share-card-item"><strong>Time:</strong> ${formatTime12Hour(scene.time)}</p>
-            <p class="share-card-item"><strong>Location:</strong> ${scene.type}. ${scene.location}</p>
-            <p class="share-card-item"><strong>Cast:</strong> ${scene.cast || 'N/A'}</p>
-            <p class="share-card-item"><strong>Contact:</strong> 📞 ${scene.contact || 'N/A'}</p>
-            <div class="share-card-footer">
-                Generated by FilmFolks Pro
-            </div>
-        </div>
-    `;
-
-    // 2. Use html2canvas to convert the populated template into an image
-    try {
-        const canvas = await html2canvas(template, { scale: 2 });
-        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
-        const file = new File([blob], `scene_${scene.number}.png`, { type: 'image/png' });
-        
-        // 3. Use the Web Share API to share the generated image file
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-            await navigator.share({
-                files: [file],
-                title: `Shooting Schedule - Scene ${scene.number}`,
-                text: `Details for Scene ${scene.number}: ${scene.heading}`
-            });
-        } else {
-            alert("Share API not supported. This feature works best on mobile. A new tab will open with the image for you to save.");
-            const imgUrl = URL.createObjectURL(blob);
-            window.open(imgUrl, '_blank');
-        }
-    } catch (error) {
-        console.error('Sharing failed:', error);
-        alert('Could not generate image for sharing.');
-    }
-}
 
 // =================================================================
 // --- UTILITY FUNCTIONS ---
