@@ -24,10 +24,24 @@
     
     <div class="container">
         <div class="section" id="scheduling">
-             <form id="schedule-form">
+            <div class="scene-cards-container" id="scene-cards-container">
+                </div>
+
+            <form id="schedule-form" class="new-scene-form">
+                <h3>Add New Scene</h3>
                 <div class="form-grid">
                     <input type="text" id="scene-number" placeholder="Scene #" required>
                     <input type="text" id="scene-heading" placeholder="Scene Heading" required>
+                    
+                    <div class="input-wrapper">
+                        <input type="date" id="scene-date" class="has-label" required>
+                        <label for="scene-date">Date</label>
+                    </div>
+                    <div class="input-wrapper">
+                        <input type="time" id="scene-time" class="has-label" required>
+                        <label for="scene-time">Time</label>
+                    </div>
+                    
                     <select id="scene-type">
                         <option value="INT">INT.</option>
                         <option value="EXT">EXT.</option>
@@ -35,8 +49,6 @@
                     <input type="text" id="scene-location" placeholder="Location" required>
                     <input type="number" id="scene-pages" placeholder="Pages" step="0.1" required>
                     
-                    <input type="date" id="scene-date" title="Shooting Date" required>
-                    <input type="time" id="scene-time" title="Shooting Time" required>
                     <input type="text" id="scene-duration" placeholder="Duration (e.g., 2h 30m)">
                      <select id="scene-status">
                         <option value="Pending">Pending</option>
@@ -49,24 +61,6 @@
                 </div>
                 <button type="submit" class="btn-primary">Add Scene</button>
             </form>
-
-            <table class="data-table" style="margin-top: 20px;">
-                <thead>
-                    <tr>
-                        <th>Scene</th>
-                        <th>Scene Heading</th>
-                        <th>Date</th>
-                        <th>Time</th>
-                        <th>Duration</th>
-                        <th>Cast</th>
-                        <th>Equipment</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="schedule-table-body">
-                    </tbody>
-            </table>
         </div>
     </div>
     <script src="script.js"></script>
