@@ -60,11 +60,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- SCHEDULING PAGE LOGIC ---
     if (document.getElementById('schedule-form')) {
         const scheduleForm = document.getElementById('schedule-form');
-        loadScheduleData(); // Load data into the global array and render it.
+        // On page load, load data into the global array and render the UI
+        loadScheduleData();
 
         scheduleForm.addEventListener('submit', (e) => {
             e.preventDefault();
 
+            // Create a new scene object directly from the form field values
             const newScene = {
                 id: Date.now(),
                 number: document.getElementById('scene-number').value,
@@ -80,9 +82,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 equipment: document.getElementById('scene-equipment').value
             };
             
-            scheduleData.push(newScene); // Add to our central data array
-            saveScheduleData(); // Save the updated array
-            renderSchedule(); // Re-render the UI
+            // Add the new scene object to our central data array
+            scheduleData.push(newScene);
+            
+            // Save the entire updated array to localStorage
+            saveScheduleData();
+            
+            // Re-render the complete list of scenes from the array
+            renderSchedule();
+            
+            // Reset the form for the next entry
             scheduleForm.reset();
         });
     }
@@ -132,7 +141,10 @@ document.addEventListener('DOMContentLoaded', () => {
 // --- SCHEDULE DATA MANAGEMENT ---
 // =================================================================
 
-// Renders the entire list of scene strips from the scheduleData array
+/**
+ * Renders the entire list of scene strips from the central scheduleData array.
+ * This function is the key to ensuring the UI always matches the data.
+ */
 function renderSchedule() {
     const container = document.getElementById('scene-strips-container');
     if (!container) return;
@@ -164,6 +176,7 @@ function renderSchedule() {
             </div>
         `;
         
+        // Add event listeners directly to the newly created buttons
         stripWrapper.querySelector('.btn-danger').addEventListener('click', () => deleteScene(scene.id));
         stripWrapper.querySelector('.share-btn-strip').addEventListener('click', () => shareScene(scene.id));
         
@@ -171,19 +184,25 @@ function renderSchedule() {
     });
 }
 
-// Loads data from localStorage into our central array and then renders it
+/**
+ * Loads data from localStorage into our central scheduleData array and then renders the UI.
+ */
 function loadScheduleData() {
     const savedData = localStorage.getItem('scheduleData');
     scheduleData = savedData ? JSON.parse(savedData) : [];
     renderSchedule();
 }
 
-// Saves the central array to localStorage
+/**
+ * Saves the entire central scheduleData array to localStorage.
+ */
 function saveScheduleData() {
     localStorage.setItem('scheduleData', JSON.stringify(scheduleData));
 }
 
-// Deletes a scene by its ID, saves the new array, and re-renders the UI
+/**
+ * Deletes a scene by its ID, saves the new array, and re-renders the UI.
+ */
 function deleteScene(id) {
     if (confirm('Are you sure you want to delete this scene?')) {
         scheduleData = scheduleData.filter(scene => scene.id !== id);
@@ -192,7 +211,9 @@ function deleteScene(id) {
     }
 }
 
-// Shares a scene as an image using html2canvas and the Web Share API
+/**
+ * Shares a scene as an image using html2canvas and the Web Share API.
+ */
 async function shareScene(id) {
     const stripElement = document.getElementById(`scene-strip-${id}`);
     if (!stripElement) return;
@@ -209,7 +230,7 @@ async function shareScene(id) {
                 text: `Details for scene ${id}.`
             });
         } else {
-            alert("Share API not supported. This feature works best on mobile browsers.");
+            alert("Share API not supported on this browser. This feature works best on mobile. You can right-click the image in the new tab to save it.");
             const imgUrl = URL.createObjectURL(blob);
             window.open(imgUrl, '_blank');
         }
@@ -273,14 +294,15 @@ function deleteBudgetItem(button) {
 // =================================================================
 
 function saveProjectFile() {
-    saveScheduleData(); // Ensure the latest data is in the array before saving
+    // Ensure the latest data from the central array is saved before bundling
+    saveScheduleData(); 
     saveBudgetData();
 
     const projectData = {
         projectName: "My Film Project",
         saveDate: new Date().toISOString(),
         version: "1.0",
-        scheduleData: scheduleData,
+        scheduleData: scheduleData, // Use the up-to-date global array
         budgetData: JSON.parse(localStorage.getItem('budgetData')) || [],
     };
     const jsonString = JSON.stringify(projectData, null, 2);
@@ -290,7 +312,7 @@ function saveProjectFile() {
     a.href = url;
     a.download = 'MyProject.filmproj';
     document.body.appendChild(a);
-a.click();
+    a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 }
@@ -310,8 +332,8 @@ function openProjectFile(event) {
             
             alert('Project loaded successfully! Navigate to the schedule or budget pages to see the new data.');
             
-            // If we are on the schedule page, immediately reload it with new data
-            if(document.getElementById('schedule-form')) {
+            // If we are currently on the schedule page, immediately reload its data and render it
+            if (document.getElementById('schedule-form')) {
                 loadScheduleData();
             }
         } catch (error) {
