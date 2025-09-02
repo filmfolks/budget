@@ -85,7 +85,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- BUDGETING PAGE LOGIC ---
-    // This section is kept for completeness, no changes here.
     if (document.getElementById('budget-form')) {
         const budgetForm = document.getElementById('budget-form');
         const currencySelect = document.getElementById('currency-select');
@@ -93,18 +92,20 @@ document.addEventListener('DOMContentLoaded', () => {
         loadBudgetData();
         
         let currentCurrency = localStorage.getItem('userCurrency') || 'USD';
-        currencySelect.value = currentCurrency;
+        if (currencySelect) currencySelect.value = currentCurrency;
         
-        currencySelect.addEventListener('change', () => {
+        if (currencySelect) currencySelect.addEventListener('change', () => {
             currentCurrency = currencySelect.value;
             localStorage.setItem('userCurrency', currentCurrency);
             document.getElementById('item-cost').placeholder = `Cost (${getCurrencySymbol(currentCurrency)})`;
             updateTotalBudget();
         });
 
-        document.getElementById('item-cost').placeholder = `Cost (${getCurrencySymbol(currentCurrency)})`;
+        if (document.getElementById('item-cost')) {
+            document.getElementById('item-cost').placeholder = `Cost (${getCurrencySymbol(currentCurrency)})`;
+        }
         
-        budgetForm.addEventListener('submit', (e) => {
+        if (budgetForm) budgetForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const cost = parseFloat(document.getElementById('item-cost').value);
             if (isNaN(cost)) {
@@ -230,62 +231,13 @@ async function shareScene(id) {
     }
 }
 
-function formatTime12Hour(timeString) {
-    if (!timeString) return "N/A";
-    const [hour, minute] = timeString.split(':');
-    const hourInt = parseInt(hour, 10);
-    const ampm = hourInt >= 12 ? 'PM' : 'AM';
-    const hour12 = hourInt % 12 || 12;
-    return `${hour12}:${minute} ${ampm}`;
-}
-
-// --- BUDGETING PAGE LOGIC ---
-    if (document.getElementById('budget-form')) {
-        const budgetForm = document.getElementById('budget-form');
-        const currencySelect = document.getElementById('currency-select');
-        
-        loadBudgetData(); // Load and render budget data
-        
-        let currentCurrency = localStorage.getItem('userCurrency') || 'USD';
-        currencySelect.value = currentCurrency;
-        
-        currencySelect.addEventListener('change', () => {
-            currentCurrency = currencySelect.value;
-            localStorage.setItem('userCurrency', currentCurrency);
-            document.getElementById('item-cost').placeholder = `Cost (${getCurrencySymbol(currentCurrency)})`;
-            updateTotalBudget();
-        });
-
-        document.getElementById('item-cost').placeholder = `Cost (${getCurrencySymbol(currentCurrency)})`;
-        
-        budgetForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const cost = parseFloat(document.getElementById('item-cost').value);
-            if (isNaN(cost)) {
-                alert('Please enter a valid cost.');
-                return;
-            }
-
-            const budgetData = {
-                description: document.getElementById('item-description').value,
-                category: document.getElementById('item-category').value,
-                cost: cost
-            };
-
-            addBudgetItemToTable(budgetData);
-            saveBudgetData();
-            budgetForm.reset();
-        });
-    }
-});
-
-
 // =================================================================
 // --- BUDGET DATA MANAGEMENT ---
 // =================================================================
 
 function addBudgetItemToTable(budgetData) {
     const budgetTableBody = document.getElementById('budget-table-body');
+    if (!budgetTableBody) return;
     const newRow = budgetTableBody.insertRow();
     newRow.innerHTML = `
         <td data-label="Description">${budgetData.description}</td>
@@ -318,7 +270,7 @@ function loadBudgetData() {
     const budgetTableBody = document.getElementById('budget-table-body');
     if (!budgetTableBody) return;
     const budgetData = JSON.parse(localStorage.getItem('budgetData')) || [];
-    budgetTableBody.innerHTML = ''; // Clear existing rows before loading
+    budgetTableBody.innerHTML = '';
     budgetData.forEach(item => addBudgetItemToTable(item));
 }
 
@@ -327,21 +279,18 @@ function deleteBudgetItem(button) {
     saveBudgetData();
 }
 
-
 // =================================================================
 // --- PROJECT FILE SAVE/LOAD ---
 // =================================================================
 
 function saveProjectFile() {
-    // Ensure the latest data from the central array is saved before bundling
     saveScheduleData(); 
     saveBudgetData();
-
     const projectData = {
         projectName: "My Film Project",
         saveDate: new Date().toISOString(),
         version: "1.0",
-        scheduleData: scheduleData, // Use the up-to-date global array
+        scheduleData: scheduleData,
         budgetData: JSON.parse(localStorage.getItem('budgetData')) || [],
     };
     const jsonString = JSON.stringify(projectData, null, 2);
@@ -359,19 +308,13 @@ function saveProjectFile() {
 function openProjectFile(event) {
     const file = event.target.files[0];
     if (!file) return;
-
     const reader = new FileReader();
     reader.onload = function(e) {
         try {
             const projectData = JSON.parse(e.target.result);
-            
-            // Load data into localStorage
             localStorage.setItem('scheduleData', JSON.stringify(projectData.scheduleData || []));
             localStorage.setItem('budgetData', JSON.stringify(projectData.budgetData || []));
-            
             alert('Project loaded successfully! Navigate to the schedule or budget pages to see the new data.');
-            
-            // If we are currently on the schedule page, immediately reload its data and render it
             if (document.getElementById('schedule-form')) {
                 loadScheduleData();
             }
@@ -382,31 +325,34 @@ function openProjectFile(event) {
     reader.readAsText(file);
 }
 
-
 // =================================================================
 // --- UTILITY FUNCTIONS ---
 // =================================================================
 
 function updateTotalBudget() {
-    if (!document.getElementById('budget-table-body')) return;
     const totalBudgetEl = document.getElementById('total-budget');
+    if (!totalBudgetEl) return;
     const costCells = document.getElementById('budget-table-body').querySelectorAll('[data-cost]');
     let total = 0;
-    costCells.forEach(cell => {
-        total += parseFloat(cell.dataset.cost);
-    });
+    costCells.forEach(cell => { total += parseFloat(cell.dataset.cost); });
     totalBudgetEl.textContent = formatCurrency(total);
 }
 
 function formatCurrency(amount) {
     const currentCurrency = localStorage.getItem('userCurrency') || 'USD';
-    return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: currentCurrency,
-    }).format(amount);
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: currentCurrency }).format(amount);
 }
 
 function getCurrencySymbol(currencyCode) {
     const symbols = { 'USD': '$', 'EUR': '€', 'INR': '₹', 'GBP': '£' };
     return symbols[currencyCode] || '$';
+}
+
+function formatTime12Hour(timeString) {
+    if (!timeString) return "N/A";
+    const [hour, minute] = timeString.split(':');
+    const hourInt = parseInt(hour, 10);
+    const ampm = hourInt >= 12 ? 'PM' : 'AM';
+    const hour12 = hourInt % 12 || 12;
+    return `${hour12}:${minute} ${ampm}`;
 }
