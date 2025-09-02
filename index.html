@@ -3,15 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FilmPro Dashboard</title>
+    <title>FilmFolks Pro</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body class="home-body">
     <header class="main-header">
-        <br><h1>🎬 FilmFolks Pro</h1></br>
-        <p>Your All-in-One Solution for Film Making</p>
-        <button id="settings-btn" class="icon-btn"><i class="fas fa-cog"></i></button>
+        <div class="header-left">
+            <button id="hamburger-btn-index" class="icon-btn"><i class="fas fa-bars"></i></button>
+        </div>
+        <div class="header-center">
+            <h1>🎬 FilmFolks Pro</h1>
+            <p>Your All-in-One Solution for Film Making</p>
+        </div>
+        <div class="header-right">
+            </div>
     </header>
 
     <main class="home-container">
@@ -27,7 +33,6 @@
                 <h3>Production Budget</h3>
                 <p>Track expenses and manage your production costs.</p>
             </a>
-
             <a href="#" class="choice-card">
                 <i class="fas fa-th-large fa-3x"></i>
                 <h3>Storyboard</h3>
@@ -45,23 +50,6 @@
             </a>
         </div>
     </main>
-
-    <div id="settings-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-btn">&times;</span>
-            <h3>Settings</h3>
-            <div class="form-group">
-                <label for="currency-select">Select Currency:</label>
-                <select id="currency-select">
-                    <option value="USD">USD ($)</option>
-                    <option value="EUR">EUR (€)</option>
-                    <option value="INR">INR (₹)</option>
-                    <option value="GBP">GBP (£)</option>
-                </select>
-            </div>
-            <button id="save-settings-btn" class="btn-primary">Save Settings</button>
-        </div>
-    </div>
     
     <script src="script.js"></script>
 </body>
