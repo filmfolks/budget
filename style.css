@@ -51,6 +51,12 @@ body {
 }
 .page-header h2 { margin: 0; }
 
+/* Add this with your other header styles */
+.dropdown-container {
+    position: relative;
+    display: inline-block;
+}
+
 /* --- Homepage Styles --- */
 .home-body { display: flex; flex-direction: column; min-height: 100vh; }
 .home-container { text-align: center; margin: auto; padding: 20px; }
